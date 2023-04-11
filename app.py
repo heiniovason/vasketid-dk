@@ -1,42 +1,67 @@
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
+import sys
 import time
 
-# vasketid.dk - login
-username = ""
-password = ""
+def login(config):
 
-driver = webdriver.Chrome("chromedriver")
-driver.get("https://vasketid.dk")
+  #######################
+  # vasketid.dk - login #
+  #######################
 
-# Target org login iframe
-iframe_path = "/html/body/div[1]/iframe[1]"
-iframe_elem = driver.find_element(By.XPATH, iframe_path)
-driver.switch_to.frame(iframe_elem)
+  driver = webdriver.Chrome(config.get("driver"))
+  driver.get(config.get("url_org_login"))
 
-username_path = "/html/body/div[1]/div[1]/form/table/tbody/tr[1]/td[2]/input"
-username_elem = driver.find_element(By.XPATH, username_path) 
-username_elem.send_keys(username)
+  # Target org login iframe
+  iframe_path = "/html/body/div[1]/iframe[1]"
+  iframe_elem = driver.find_element(By.XPATH, iframe_path)
+  driver.switch_to.frame(iframe_elem)
 
-passw_path = "/html/body/div[1]/div[1]/form/table/tbody/tr[2]/td[2]/input"
-passw_elem = driver.find_element(By.XPATH, passw_path)
-passw_elem.send_keys(password)
+  forening_path = "/html/body/div[1]/div[1]/form/table/tbody/tr[1]/td[2]/input"
+  driver.find_element(By.XPATH, forening_path).send_keys(config.get("forening"))
 
-submit_path = "/html/body/div[1]/div[1]/form/table/tbody/tr[4]/td[2]/button"
-submit_elem = driver.find_element(By.XPATH, submit_path)
-submit_elem.click()
+  afdeling_path = "/html/body/div[1]/div[1]/form/table/tbody/tr[2]/td[2]/input"
+  driver.find_element(By.XPATH, afdeling_path).send_keys(config.get("afdeling"))
 
-time.sleep(3)
+  submit_path = "/html/body/div[1]/div[1]/form/table/tbody/tr[4]/td[2]/button"
+  driver.find_element(By.XPATH, submit_path).click()
 
-# Target <frame 1> inside <frameset>
-frame_path = "/html/frameset/frame[1]"
-frame_elem = driver.find_element(By.XPATH, frame_path)
-driver.switch_to.frame(frame_elem)
+  #time.sleep(10)
 
-login_link_path = "/html/body/center/table/tbody/td[2]/a" # WRONG PATH!!!
-link_elem = driver.find_element(By.XPATH, login_link_path)
-link_elem.click()
+  ##############
+  # sc - login #
+  ##############
+ 
+  driver.get(config.get("url_brg_login"))
 
-time.sleep(3)
+  brugernavn_path = "/html/body/center/table[2]/tbody/tr[2]/td[3]/input"
+  driver.find_element(By.XPATH, brugernavn_path).send_keys(config.get("brugernavn"))
+  
+  adgangskode_path = "/html/body/center/table[2]/tbody/tr[3]/td[3]/input"
+  driver.find_element(By.XPATH, adgangskode_path).send_keys(config.get("adganskode"))
+  
+  submit_path = "/html/body/center/table[2]/tbody/tr[5]/td[2]/button"
+  driver.find_element(By.XPATH, submit_path).click()
 
+  # Redirects to http://87.61.135.30/BrugerStart.asp
+  # Links fra menuen: /Logoff.asp, /help-sc.asp, /Info.asp, /MinKonto.asp, /Saldo.aps, /Status.asp, /Reservation.asp, /Symbol.asp, /OpenTime.asp
+
+  time.sleep(10)
+
+def main():
+
+  config = {
+    "forening": sys.argv[1],
+    "afdeling": sys.argv[2],
+    "brugernavn": sys.argv[3],
+    "adganskode": sys.argv[4],
+    "driver": sys.argv[5],
+    "url_org_login": sys.argv[6],
+    "url_brg_login": sys.argv[7]
+  }
+
+  login(config)
+
+if __name__ == "__main__":
+    main()
