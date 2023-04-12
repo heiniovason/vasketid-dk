@@ -33,7 +33,7 @@ def login(config):
   # sc - login #
   ##############
  
-  driver.get(config.get("url_brg_login"))
+  driver.get("{0}/{1}".format(config.get("sc_base_url"),"aLog.asp"))
 
   brugernavn_path = "/html/body/center/table[2]/tbody/tr[2]/td[3]/input"
   driver.find_element(By.XPATH, brugernavn_path).send_keys(config.get("brugernavn"))
@@ -42,11 +42,31 @@ def login(config):
   driver.find_element(By.XPATH, adgangskode_path).send_keys(config.get("adganskode"))
   
   submit_path = "/html/body/center/table[2]/tbody/tr[5]/td[2]/button"
-  driver.find_element(By.XPATH, submit_path).click()
 
   # Redirects to http://87.61.135.30/BrugerStart.asp
+  driver.find_element(By.XPATH, submit_path).click()
+
   # Links fra menuen: /Logoff.asp, /help-sc.asp, /Info.asp, /MinKonto.asp, /Saldo.aps, /Status.asp, /Reservation.asp, /Symbol.asp, /OpenTime.asp
 
+  time.sleep(10)
+  # Ref til help-sc.asp virker åbentbart ikke ud af boksen - se js output i konsol
+  #driver.get("{0}/{1}".format(config.get("sc_base_url"),"help-sc.asp"))
+  #time.sleep(5)
+  driver.get("{0}/{1}".format(config.get("sc_base_url"),"Info.asp"))
+  time.sleep(5)
+  driver.get("{0}/{1}".format(config.get("sc_base_url"),"MinKonto.asp"))
+  time.sleep(5)
+  driver.get("{0}/{1}".format(config.get("sc_base_url"),"Saldo.asp"))
+  time.sleep(5)
+  driver.get("{0}/{1}".format(config.get("sc_base_url"),"Status.asp"))
+  time.sleep(5)
+  driver.get("{0}/{1}".format(config.get("sc_base_url"),"Reservation.asp"))
+  time.sleep(5)
+  driver.get("{0}/{1}".format(config.get("sc_base_url"),"Symbol.asp"))
+  time.sleep(5)
+  driver.get("{0}/{1}".format(config.get("sc_base_url"),"OpenTime.asp"))
+  time.sleep(5)
+  driver.get("{0}/{1}".format(config.get("sc_base_url"),"Logoff.asp"))
   time.sleep(10)
 
 def main():
@@ -58,7 +78,7 @@ def main():
     "adganskode": sys.argv[4],
     "driver": sys.argv[5],
     "url_org_login": sys.argv[6],
-    "url_brg_login": sys.argv[7]
+    "sc_base_url": sys.argv[7]
   }
 
   login(config)
