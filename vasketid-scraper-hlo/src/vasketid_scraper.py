@@ -1,20 +1,25 @@
 from bs4 import BeautifulSoup
 from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
-import sys
-import time
+from selenium.webdriver.chrome.options import Options
 
-def login_and_scrape_to_soup(config):
+def login_and_scrape_to_soup(config, headless=False):
 
+  # TODO: Remember to choose random agent
   # https://pypi.org/project/fake-useragent/
+
+  options = Options()
+  options.headless = headless
+  driver = webdriver.Chrome(
+    config.get("SELENIUM_DRIVER"),
+    options=options
+    )
+
+  driver.get(config.get("CUSTOMER_LOGIN"))
 
   #######################
   # vasketid.dk - login #
   #######################
-
-  driver = webdriver.Chrome(config.get("SELENIUM_DRIVER"))
-  driver.get(config.get("CUSTOMER_LOGIN"))
 
   # Target org login iframe
   iframe_path = "/html/body/div[1]/iframe[1]"
@@ -33,8 +38,6 @@ def login_and_scrape_to_soup(config):
 
   submit_path = "/html/body/div[1]/div[1]/form/table/tbody/tr[4]/td[2]/button"
   driver.find_element(By.XPATH, submit_path).click()
-
-  #time.sleep(10)
 
   ##############
   # sc - login #
@@ -59,33 +62,31 @@ def login_and_scrape_to_soup(config):
 
   # Links fra menuen: /Logoff.asp, /help-sc.asp, /Info.asp, /MinKonto.asp, /Saldo.aps, /Status.asp, /Reservation.asp, /Symbol.asp, /OpenTime.asp
 
-  time.sleep(10)
   # Ref til help-sc.asp virker åbentbart ikke ud af boksen - se js output i konsol
   #driver.get("{0}/{1}".format(config.get("sc_base_url"),"help-sc.asp"))
   #time.sleep(5)
 
   soup_dict = dict()
 
-  # Build
+  # TODO: Do async requests - blov takes 9-12 seconds to finish.
+  driver.get("{0}/{1}".format(config.get("SC_BASE_URL"),"Info.asp"))
+  soup_dict["info"] = driver.page_source
+  driver.get("{0}/{1}".format(config.get("SC_BASE_URL"),"MinKonto.asp"))
+  soup_dict["user_account"] = driver.page_source
+  driver.get("{0}/{1}".format(config.get("SC_BASE_URL"),"Saldo.asp"))
+  soup_dict["saldo"] = driver.page_source
+  driver.get("{0}/{1}".format(config.get("SC_BASE_URL"),"Status.asp"))
+  soup_dict["status"] = driver.page_source
+  driver.get("{0}/{1}".format(config.get("SC_BASE_URL"),"Reservation.asp"))
+  soup_dict["reservations"] = driver.page_source
+  driver.get("{0}/{1}".format(config.get("SC_BASE_URL"),"Symbol.asp"))
+  soup_dict["symbols"] = driver.page_source
+  driver.get("{0}/{1}".format(config.get("SC_BASE_URL"),"OpenTime.asp"))
+  soup_dict["opentime"] = driver.page_source
 
-  driver.get("{0}/{1}".format(config.get("sc_base_url"),"Info.asp"))
-  time.sleep(5)
-  driver.get("{0}/{1}".format(config.get("sc_base_url"),"MinKonto.asp"))
-  html = driver.page_source
-  soup_min_konto = BeautifulSoup(html)
-  print(soup_min_konto)
-  time.sleep(5)
-  driver.get("{0}/{1}".format(config.get("sc_base_url"),"Saldo.asp"))
-  time.sleep(5)
-  driver.get("{0}/{1}".format(config.get("sc_base_url"),"Status.asp"))
-  time.sleep(5)
-  driver.get("{0}/{1}".format(config.get("sc_base_url"),"Reservation.asp"))
-  time.sleep(5)
-  driver.get("{0}/{1}".format(config.get("sc_base_url"),"Symbol.asp"))
-  time.sleep(5)
-  driver.get("{0}/{1}".format(config.get("sc_base_url"),"OpenTime.asp"))
-  time.sleep(5)
-  driver.get("{0}/{1}".format(config.get("sc_base_url"),"Logoff.asp"))
-  time.sleep(10)
+  # Log off
+  driver.get("{0}/{1}".format(config.get("SC_BASE_URL"),"Logoff.asp"))
+  # Kill driver instance
+  driver.close()
 
   return soup_dict

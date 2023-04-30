@@ -1,0 +1,22 @@
+import vasketid_scraper
+import json
+
+config = {
+    "SELENIUM_DRIVER": "<driver>",
+    "CUSTOMER_LOGIN": "http://<url>",
+    "CUSTOMER": "<customer>",
+    "DEPARTMENT": "<department>",
+    "RESIDENT_ACCOUNT": "<resident_account>",
+    "RESIDENT_TOKEN": "<resident_token",
+    "SC_BASE_URL": "http://<url>"
+}
+
+result = vasketid_scraper.login_and_scrape_to_soup(
+    config,
+    True
+    )
+
+# Not yet filtered.
+print(json.dumps(result, indent = 4))
+
+
